@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plost
+import plotly.express as px
 import datetime
 # Data Loading
 import data.loadMessages as loadMessages
@@ -121,6 +122,42 @@ with Files:
                 'FileSize': '{:.2f} MB',
             })
         )
+
+
+    # Create a pie chart of the space used by each type of file using plotly
+    st.markdown('### Space used')
+    chatFiles = filesData.getChatFiles()
+    contactFiles = filesData.getContactFiles()
+    if messageFiles is None or len(messageFiles) == 0:
+        st.markdown('No message files found.')
+    elif mediaFiles is None or len(mediaFiles) == 0:
+        st.markdown('No media files found.')
+    elif chatFiles is None or len(chatFiles) == 0:
+        st.markdown('No chat files found.')
+    elif contactFiles is None or len(contactFiles) == 0:
+        st.markdown('No contact files found.')
+    else:
+        message_files_df = pd.DataFrame(messageFiles)
+        media_files_df = pd.DataFrame(mediaFiles)
+        chat_files_df = pd.DataFrame(chatFiles)
+        contact_files_df = pd.DataFrame(contactFiles)
+        # convert filesize to MB
+        message_files_df['FileSize'] = message_files_df['FileSize'] / (1024*1024)
+        media_files_df['FileSize'] = media_files_df['FileSize'] / (1024*1024)
+        chat_files_df['FileSize'] = chat_files_df['FileSize'] / (1024*1024)
+        contact_files_df['FileSize'] = contact_files_df['FileSize'] / (1024*1024)
+        # add a column to identify the type of file
+        message_files_df['FileType'] = 'Message'
+        media_files_df['FileType'] = 'Media'
+        chat_files_df['FileType'] = 'Chat'
+        contact_files_df['FileType'] = 'Contact'
+        # combine both dataframes
+        files_df = pd.concat([message_files_df, media_files_df, chat_files_df, contact_files_df])
+        # create a pie chart
+        fig = px.pie(files_df, values='FileSize', names='FileType', title='Space used by each type of file')
+        st.plotly_chart(fig, use_container_width=True)
+
+    
 
 
 
