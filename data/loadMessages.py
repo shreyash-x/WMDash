@@ -1,4 +1,5 @@
 import json
+import re
 from datetime import datetime
 import data.fetchMongo as fetchMongo
 
@@ -43,6 +44,16 @@ class MessageData:
             if name == userName and message['chatName'] == chatName:
                 return self.getMessagesFromFile(message['messages']['filename'])
         return None
+    
+    def getMessageIds(self, userName, chatNames):
+        if userName is None or chatNames is None:
+            return None
+        ids = []
+        for message in self.data:
+            name = message['userName'] + ' (' + message['userID'][-4:] + ')'
+            if name == userName and message['chatName'] in chatNames:
+                ids.append(str(message['_id']))
+        return ids
     
     def getMessageCount(self, userName):
         data = []

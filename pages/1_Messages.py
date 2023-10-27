@@ -43,16 +43,17 @@ if messages is None or len(messages) == 0:
 else:
     message_df = pd.DataFrame(messages)
     # display only few columns
-    message_df = message_df[['timestamp', 'body', 'type', 'mediaDownloaded', 'isAnonymized']]
+    # message_df = message_df[['timestamp', 'body', 'type', 'mediaDownloaded', 'isAnonymized']]
     message_df['timestamp'] = pd.to_datetime(message_df['timestamp'], unit='s')
     message_df = message_df[(message_df['timestamp'].dt.date >= start_date) & (message_df['timestamp'].dt.date <= end_date)]
     message_df = message_df.set_index('timestamp')
     message_df = message_df.sort_index()
+    freq_message_df = message_df.copy()
+    message_df['body'] = message_df['body'].apply(lambda x: x.encode('utf-8', 'ignore').decode('utf-8'))
     st.write(message_df)
 
     # Plot frequency of messages per day
     st.markdown('### Messages per day')
-    freq_message_df = message_df.copy()
     freq_message_df['date'] = freq_message_df.index.date
     freq_message_df = freq_message_df.groupby('date').count()
     freq_message_df = freq_message_df[['body']]
